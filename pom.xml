@@ -10,9 +10,10 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <dnsdb-sdk.version>0.0.1-SNAPSHOT</dnsdb-sdk.version>
+        <dnsdb-sdk.version>0.0.1</dnsdb-sdk.version>
         <jdk.version>1.8</jdk.version>
         <jackson.version>2.7.3</jackson.version>
+        <guava.version>24.0-jre</guava.version>
         <argparse4j.version>0.8.1</argparse4j.version>
         <ini4j.version>0.5.4</ini4j.version>
         <commons-csv.version>1.5</commons-csv.version>
@@ -26,6 +27,12 @@
             <groupId>io.dnsdb.sdk</groupId>
             <artifactId>dnsdb-java-sdk</artifactId>
             <version>${dnsdb-sdk.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
         </dependency>
 
         <dependency>
