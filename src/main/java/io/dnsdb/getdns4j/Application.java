@@ -16,6 +16,12 @@ public class Application {
 
   public static void main(String[] args) {
     SubCommandManager subCommands = new SubCommandManager();
+    ArgumentParser parser = getParser(subCommands);
+    Namespace namespace = parser.parseArgsOrFail(args);
+    subCommands.exec(args[0], namespace);
+  }
+
+  public static ArgumentParser getParser(SubCommandManager subCommands) {
     ArgumentParser parser = ArgumentParsers.newFor("getdns4j").build().version("${prog} 0.0.1")
         .description("search DNS records using the DNSDB Web API").defaultHelp(true);
     parser.addArgument("--version", "-V").action(Arguments.version()).help("show version");
@@ -24,8 +30,7 @@ public class Application {
         .metavar("COMMAND");
     subCommands.add(new SearchCommand(subparsers)).add(new APIUserCommand(subparsers))
         .add(new ConfigCommand(subparsers));
-    Namespace namespace = parser.parseArgsOrFail(args);
-    subCommands.exec(args[0], namespace);
+    return parser;
   }
 
 }

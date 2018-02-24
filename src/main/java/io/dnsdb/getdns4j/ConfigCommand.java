@@ -1,6 +1,8 @@
 package io.dnsdb.getdns4j;
 
 import io.dnsdb.getdns4j.utils.Json;
+import java.io.IOException;
+import java.io.PrintStream;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
@@ -13,6 +15,8 @@ import net.sourceforge.argparse4j.inf.Subparsers;
  * @version 1.0
  */
 public class ConfigCommand extends SubCommand {
+
+  private PrintStream outPrintSteam = System.out;
 
   public ConfigCommand(Subparsers subparsers) {
     super(subparsers);
@@ -42,7 +46,8 @@ public class ConfigCommand extends SubCommand {
   public int exec(Namespace namespace) {
     Settings settings = Settings.newInstance();
     if (namespace.getBoolean("show")) {
-      System.out.println(Json.dumps(settings.toMap(), true));
+      getOutPrintSteam().println(Json.dumps(settings.toMap(), true));
+      return 0;
     }
     String apiId = namespace.get("api_id");
     String apiKey = namespace.get("api_key");
@@ -54,7 +59,21 @@ public class ConfigCommand extends SubCommand {
     settings.setTimeout(timeout);
     settings.setProxy(proxy);
     settings.setApiUrl(apiUrl);
-    settings.save();
+    try {
+      settings.save();
+    } catch (IOException e) {
+      getErrPrintStream().println(e.getMessage());
+      return -1;
+    }
     return 0;
+  }
+
+  public PrintStream getOutPrintSteam() {
+    return outPrintSteam;
+  }
+
+  public ConfigCommand setOutPrintSteam(PrintStream outPrintSteam) {
+    this.outPrintSteam = outPrintSteam;
+    return this;
   }
 }

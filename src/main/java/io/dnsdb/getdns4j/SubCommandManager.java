@@ -20,12 +20,13 @@ public class SubCommandManager {
     return this;
   }
 
-  public void exec(String command, Namespace namespace) {
+  public int exec(String command, Namespace namespace) throws NoSuchCommandExecException {
     for (SubCommand subCommand : subCommands) {
       if (subCommand.getCommand().equals(command)) {
-        subCommand.exec(namespace);
+        return subCommand.exec(namespace);
       }
     }
+    throw new NoSuchCommandExecException();
   }
 
 }

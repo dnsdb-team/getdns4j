@@ -1,12 +1,12 @@
 package io.dnsdb.getdns4j;
 
 import com.google.common.base.Strings;
-import io.dnsdb.getdns4j.format.DNSRecordCSVFormat;
-import io.dnsdb.getdns4j.format.DNSRecordCustomFormat;
-import io.dnsdb.getdns4j.format.DNSRecordFormat;
-import io.dnsdb.getdns4j.format.DNSRecordJsonFormat;
-import io.dnsdb.getdns4j.utils.InvalidProxyStringException;
+import io.dnsdb.getdns4j.format.DNSRecordCSVFormatter;
+import io.dnsdb.getdns4j.format.DNSRecordCustomFormatter;
+import io.dnsdb.getdns4j.format.DNSRecordFormatter;
+import io.dnsdb.getdns4j.format.DNSRecordJsonFormatter;
 import io.dnsdb.getdns4j.utils.ProgressBar;
+import io.dnsdb.getdns4j.utils.proxy.InvalidProxyStringException;
 import io.dnsdb.getdns4j.utils.proxy.ProxyUtils;
 import io.dnsdb.sdk.APIClient;
 import io.dnsdb.sdk.APIClientBuilder;
@@ -16,14 +16,16 @@ import io.dnsdb.sdk.DNSRecordResult;
 import io.dnsdb.sdk.Query;
 import io.dnsdb.sdk.exceptions.APIException;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.PrintStream;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentGroup;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import net.sourceforge.argparse4j.inf.Subparsers;
+import org.apache.http.client.config.RequestConfig;
 
 /**
  * <code>SearchCommand</code>类表示<code>search</code>子命令。
@@ -33,18 +35,18 @@ import net.sourceforge.argparse4j.inf.Subparsers;
  */
 public class SearchCommand extends SubCommand {
 
+  private ProgressBar progressBar = new ProgressBar();
+
   public SearchCommand(Subparsers subparsers) {
     super(subparsers);
     Settings settings = Settings.newInstance();
-    String apiUrl = settings.getString("settings", "api-url", "https://api.dnsdb.io");
-    String apiId = settings.getString("auth", "api-id", "");
-    String apiKey = settings.getString("auth", "api-key", "");
-    String proxy = settings.getString("settings", "proxy", "");
+    String apiUrl = settings.getApiUrl();
+    String apiId = settings.getApiId();
+    String apiKey = settings.getApiKey();
+    String proxy = settings.getProxy();
+    float timeout = settings.getTimeout();
     String format_help = "set custom output format. #{host} represents DNS record\"s host, #{type} represents DNS record\"s type, #{value} represents DNS record\"s value. For example: -f \"#{host},#{type},#{value}\"";
     String proxy_help = "set proxy. HTTP proxy: \"http://user:pass@host:port/\", SOCKS5 proxy: \"socks5://user:pass@host:port\"";
-    if (!Strings.isNullOrEmpty(proxy)) {
-      proxy_help += String.format(", current proxy is \"%s\"", proxy);
-    }
     Subparser searchParser = subparsers.addParser("search").help("search DNS records")
         .description("search DNS records").defaultHelp(true);
     searchParser.addArgument("-o", "--output").setDefault("-")
@@ -59,6 +61,8 @@ public class SearchCommand extends SubCommand {
     searchParser.addArgument("-p", "--proxy").help(proxy_help).setDefault(proxy);
     searchParser.addArgument("--api-url").help(String.format("set API URL, default \"%s\"", apiUrl))
         .setDefault(apiUrl);
+    searchParser.addArgument("-T", "--timeout").help("set the socket timeout").setDefault(timeout)
+        .type(Float.class);
     ArgumentGroup searchGroup = searchParser.addArgumentGroup("search options");
     searchGroup.addArgument("-d", "--domain").help("search by domain");
     searchGroup.addArgument("-H", "--host").help("search by host");
@@ -87,13 +91,14 @@ public class SearchCommand extends SubCommand {
 
   @Override
   public int exec(Namespace namespace) {
+    PrintStream errPrintStream = getErrPrintStream();
     APIManager.API_BASE_URL = namespace.getString("api_url");
     String proxy = namespace.get("proxy");
     if (!Strings.isNullOrEmpty(proxy)) {
       try {
         ProxyUtils.setProxy(proxy);
       } catch (InvalidProxyStringException e) {
-        System.err.println("invalid proxy");
+        errPrintStream.println("invalid proxy");
         return -1;
       }
     }
@@ -113,58 +118,79 @@ public class SearchCommand extends SubCommand {
     String output = namespace.getString("output");
     Long max = namespace.get("max");
     String customFormat = namespace.getString("format");
-    APIClient client = new APIClientBuilder(apiId, apiKey).build();
+    float timeout = namespace.getFloat("timeout");
+    APIClient client = buildAPIClient(apiId, apiKey, timeout);
     Query query = new Query().setDomain(domain).setHost(host).setIp(ip).setType(type)
         .setValueDomain(valueDomain).setValueHost(valueHost).setValueIp(valueIp).setEmail(email);
-    OutputStream outputStream = System.out;
-    DNSRecordFormat format;
+    PrintStream outputStream = null;
+    DNSRecordFormatter formatter;
     if (namespace.getBoolean("csv")) {
-      format = new DNSRecordCSVFormat();
+      formatter = new DNSRecordCSVFormatter();
     } else if (!Strings.isNullOrEmpty(customFormat)) {
-      format = new DNSRecordCustomFormat(customFormat);
+      formatter = new DNSRecordCustomFormatter(customFormat);
     } else {
-      format = new DNSRecordJsonFormat();
+      formatter = new DNSRecordJsonFormatter();
     }
     try {
-      if (!output.equals("-")) {
-        outputStream = new FileOutputStream(new File(output));
-      }
+      outputStream = createOutputStream(output);
       DNSRecordResult result;
       if (all) {
         result = client.scan(query, pageSize);
       } else {
         result = client.search(query, page, pageSize);
       }
-      ProgressBar bar = null;
+      ProgressBar progressBar = null;
       if (!outputStream.equals(System.out)) {
-        bar = new ProgressBar("Receiving", result.size());
-        bar.setSuffix("(%(current)s/%(max)s)");
+        progressBar = getProgressBar();
+        progressBar.setTitle("Receiving");
+        progressBar.setMax(result.size());
       }
       long count = 0;
       for (DNSRecord record : result) {
         if (max != null && count >= max) {
           break;
         }
-        String data = format.format(record) + System.lineSeparator();
-        outputStream.write(data.getBytes());
-        if (bar != null) {
-          bar.update();
+        String data = formatter.format(record);
+        outputStream.println(data);
+        if (progressBar != null) {
+          progressBar.update();
         }
         count++;
       }
     } catch (APIException | IOException e) {
-      System.err.println(e.getMessage());
+      errPrintStream.println(e.getMessage());
       return -1;
     } finally {
-      if (!outputStream.equals(System.out)) {
-        try {
-          outputStream.close();
-        } catch (IOException e) {
-          e.printStackTrace();
-
-        }
+      if (outputStream != null && !outputStream.equals(System.out)) {
+        outputStream.close();
       }
     }
     return 0;
   }
+
+  protected APIClient buildAPIClient(String apiId, String apiKey, float timeout) {
+    int timeoutMilliseconds = (int) (timeout * 1000);
+    RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(timeoutMilliseconds)
+        .setConnectionRequestTimeout(timeoutMilliseconds).setSocketTimeout(timeoutMilliseconds)
+        .build();
+    return new APIClientBuilder(apiId, apiKey).setRequestConfig(requestConfig).build();
+  }
+
+  protected PrintStream createOutputStream(String output) throws FileNotFoundException {
+    if (output.equals("-")) {
+      return System.out;
+    } else {
+      return new PrintStream(new FileOutputStream(new File(output)));
+    }
+  }
+
+  public ProgressBar getProgressBar() {
+    return progressBar;
+  }
+
+  public SearchCommand setProgressBar(ProgressBar progressBar) {
+    this.progressBar = progressBar;
+    return this;
+  }
+
 }

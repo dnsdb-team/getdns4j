@@ -7,10 +7,12 @@ import io.dnsdb.sdk.APIManager;
 import io.dnsdb.sdk.APIUser;
 import io.dnsdb.sdk.exceptions.APIException;
 import java.io.IOException;
+import java.io.PrintStream;
 import net.sourceforge.argparse4j.inf.ArgumentGroup;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import net.sourceforge.argparse4j.inf.Subparsers;
+import org.apache.http.client.config.RequestConfig;
 
 /**
  * <code>APIUserCommand</code>类表示<code>api-user</code>子命令。
@@ -19,6 +21,8 @@ import net.sourceforge.argparse4j.inf.Subparsers;
  * @version 1.0
  */
 public class APIUserCommand extends SubCommand {
+
+  private PrintStream outPrintSteam = System.out;
 
   public APIUserCommand(Subparsers subparsers) {
     super(subparsers);
@@ -45,17 +49,36 @@ public class APIUserCommand extends SubCommand {
 
   @Override
   public int exec(Namespace namespace) {
+    PrintStream err = getErrPrintStream();
     APIManager.API_BASE_URL = namespace.getString("api_url");
     String apiId = namespace.getString("api_id");
     String apiKey = namespace.getString("api_key");
-    APIClient client = new APIClientBuilder(apiId, apiKey).build();
+    float timeout = namespace.getFloat("timeout");
+    APIClient client = buildAPIClient(apiId, apiKey, timeout);
     try {
       APIUser apiUser = client.getAPIUser();
-      System.out.println(Json.dumps(apiUser, true));
+      getOutPrintSteam().println(Json.dumps(apiUser, true));
     } catch (APIException | IOException e) {
-      System.err.println(e.getMessage());
+      err.println(e.getMessage());
       return -1;
     }
     return 0;
+  }
+
+  protected APIClient buildAPIClient(String apiId, String apiKey, float timeout) {
+    int timeoutMilliseconds = (int) (timeout * 1000);
+    RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(timeoutMilliseconds)
+        .setConnectionRequestTimeout(timeoutMilliseconds).setSocketTimeout(timeoutMilliseconds)
+        .build();
+    return new APIClientBuilder(apiId, apiKey).setRequestConfig(requestConfig).build();
+  }
+
+  public PrintStream getOutPrintSteam() {
+    return outPrintSteam;
+  }
+
+  public APIUserCommand setOutPrintSteam(PrintStream outPrintSteam) {
+    this.outPrintSteam = outPrintSteam;
+    return this;
   }
 }

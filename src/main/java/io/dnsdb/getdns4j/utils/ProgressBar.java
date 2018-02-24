@@ -2,6 +2,7 @@ package io.dnsdb.getdns4j.utils;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import java.io.PrintStream;
 import java.text.NumberFormat;
 import java.util.List;
 
@@ -13,9 +14,9 @@ import java.util.List;
  */
 public class ProgressBar {
 
-  final List<Character> phases = Lists.newArrayList('▏', '▎', '▍', '▌', '▋', '▊', '▉', '█');
+  private List<Character> phases = Lists.newArrayList('▏', '▎', '▍', '▌', '▋', '▊', '▉', '█');
   private String title = "Progress";
-  private String suffix;
+  private String suffix = "(%(current)s/%(max)s)";
   private long max;
   private long current = 0;
   private int width = 32;
@@ -23,8 +24,10 @@ public class ProgressBar {
   private double progress = 0;
   private String barPrefix = " |";
   private String barSuffix = "|";
-  private String emptyFill = " ";
+  private char emptyFill = ' ';
+  private char cleanChar = '\r';
   private NumberFormat progressFormat = NumberFormat.getPercentInstance();
+  private PrintStream printStream = System.out;
 
 
   public ProgressBar() {
@@ -36,7 +39,7 @@ public class ProgressBar {
   }
 
   private void clearLine() {
-    System.out.print("\r");
+    printStream.print(cleanChar);
   }
 
   public ProgressBar(String title, long max) {
@@ -51,7 +54,7 @@ public class ProgressBar {
   }
 
   public void update() {
-    if (current > max) {
+    if (current >= max) {
       return;
     }
     current++;
@@ -63,27 +66,42 @@ public class ProgressBar {
     }
     currentStep = nextStep;
     clearLine();
-    System.out.print(title);
-    System.out.print(barPrefix);
+    printStream.print(title);
+    printStream.print(barPrefix);
     int filledWidth = 0;
     for (int i = 0; i < currentStep / phases.size(); i++) {
-      System.out.print(phases.get(phases.size() - 1));
+      printStream.print(phases.get(phases.size() - 1));
       filledWidth++;
     }
     int phaseIndex = currentStep % phases.size() - 1;
     if (phaseIndex > 0) {
-      System.out.print(phases.get(phaseIndex));
+      printStream.print(phases.get(phaseIndex));
       filledWidth++;
     }
     for (int i = 0; i < width - filledWidth; i++) {
-      System.out.print(emptyFill);
+      printStream.print(emptyFill);
     }
-    System.out.print(barSuffix);
+    printStream.print(barSuffix);
     String suffixContent = Strings.nullToEmpty(suffix);
     suffixContent = suffixContent.replace("%(max)s", max + "")
         .replace("%(current)s", current + "")
         .replace("%(progress)s", progressFormat.format(progress));
-    System.out.print(suffixContent);
+    printStream.print(suffixContent);
+  }
+
+  public void reset() {
+    current = 0;
+    currentStep = 0;
+    progress = 0;
+  }
+
+  public List<Character> getPhases() {
+    return phases;
+  }
+
+  public ProgressBar setPhases(List<Character> phases) {
+    this.phases = phases;
+    return this;
   }
 
   public String getTitle() {
@@ -167,12 +185,21 @@ public class ProgressBar {
     return this;
   }
 
-  public String getEmptyFill() {
+  public char getEmptyFill() {
     return emptyFill;
   }
 
-  public ProgressBar setEmptyFill(String emptyFill) {
+  public ProgressBar setEmptyFill(char emptyFill) {
     this.emptyFill = emptyFill;
+    return this;
+  }
+
+  public char getCleanChar() {
+    return cleanChar;
+  }
+
+  public ProgressBar setCleanChar(char cleanChar) {
+    this.cleanChar = cleanChar;
     return this;
   }
 
@@ -182,6 +209,15 @@ public class ProgressBar {
 
   public ProgressBar setProgressFormat(NumberFormat progressFormat) {
     this.progressFormat = progressFormat;
+    return this;
+  }
+
+  public PrintStream getPrintStream() {
+    return printStream;
+  }
+
+  public ProgressBar setPrintStream(PrintStream printStream) {
+    this.printStream = printStream;
     return this;
   }
 }

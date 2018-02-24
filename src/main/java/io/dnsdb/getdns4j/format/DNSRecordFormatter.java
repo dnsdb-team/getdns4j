@@ -3,12 +3,12 @@ package io.dnsdb.getdns4j.format;
 import io.dnsdb.sdk.DNSRecord;
 
 /**
- * <code>DNSRecordFormat</code>接口定义了格式化<code>DNSRecord</code>类的方法。
+ * <code>DNSRecordFormatter</code>接口定义了格式化<code>DNSRecord</code>类的方法。
  *
  * @author Remonsan
  * @version 1.0
  */
-public interface DNSRecordFormat {
+public interface DNSRecordFormatter {
 
   /**
    * 格式化<code>DNSRecord</code>对象。

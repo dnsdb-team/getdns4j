@@ -1,5 +1,6 @@
 package io.dnsdb.getdns4j;
 
+import java.io.PrintStream;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparsers;
 
@@ -11,10 +12,21 @@ import net.sourceforge.argparse4j.inf.Subparsers;
  */
 public abstract class SubCommand {
 
+  private PrintStream errPrintStream = System.err;
+
   public SubCommand(Subparsers subparsers) {
   }
 
   public abstract String getCommand();
 
   public abstract int exec(Namespace namespace);
+
+  public PrintStream getErrPrintStream() {
+    return errPrintStream;
+  }
+
+  public SubCommand setErrPrintStream(PrintStream errPrintStream) {
+    this.errPrintStream = errPrintStream;
+    return this;
+  }
 }

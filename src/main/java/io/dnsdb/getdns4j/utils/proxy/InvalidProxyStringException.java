@@ -1,4 +1,4 @@
-package io.dnsdb.getdns4j.utils;
+package io.dnsdb.getdns4j.utils.proxy;
 
 /**
  * <code>InvalidProxyStringException</code>类表示配置代理字符串格式异常。

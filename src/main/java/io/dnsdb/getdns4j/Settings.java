@@ -17,7 +17,7 @@ import org.ini4j.Profile;
 public class Settings {
 
   private Ini ini;
-  private static final String CONFIG = System.getProperty("user.home") + "/" + ".getdns";
+  public static final String CONFIG = System.getProperty("user.home") + "/.getdns";
   private static final Settings settings = new Settings(CONFIG);
 
   private Settings(String path) {
@@ -31,8 +31,8 @@ public class Settings {
         ini = new Ini();
       }
       ini.setConfig(config);
-    } catch (IOException ignored) {
-      ignored.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 
@@ -40,13 +40,8 @@ public class Settings {
     return settings;
   }
 
-  public void save() {
-    try {
-      ini.store(new File(CONFIG));
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    ;
+  public void save() throws IOException {
+    ini.store(new File(CONFIG));
   }
 
   public String getString(String sectionName, String optionName, String defaultValue) {
@@ -58,14 +53,6 @@ public class Settings {
           return value;
         }
       }
-    }
-    return defaultValue;
-  }
-
-  public int getInt(String sectionName, String optionName, int defaultValue) {
-    String value = getString(sectionName, optionName, null);
-    if (value != null) {
-      return Integer.parseInt(value);
     }
     return defaultValue;
   }
@@ -110,7 +97,7 @@ public class Settings {
     ini.put("settings", "proxy", proxy);
   }
 
-  public Float getTimeout() {
+  public float getTimeout() {
     return getFloat("settings", "timeout", 15);
   }
 
@@ -128,11 +115,4 @@ public class Settings {
     return map;
   }
 
-
-  public static void main(String[] args) {
-    Settings settings = Settings.newInstance();
-    System.out.println(settings.getString("auth", "api-id", ""));
-    settings.setApiUrl("http://localhost:8000/api");
-    settings.save();
-  }
 }

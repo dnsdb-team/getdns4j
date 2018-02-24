@@ -5,12 +5,12 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.QuoteMode;
 
 /**
- * <code>DNSRecordCSVFormat</code>类用于将<code>DNSRecord</code>格式化为CSV。
+ * <code>DNSRecordCSVFormatter</code>类用于将<code>DNSRecord</code>格式化为CSV。
  *
  * @author Remonsan
  * @version 1.0
  */
-public class DNSRecordCSVFormat implements DNSRecordFormat {
+public class DNSRecordCSVFormatter implements DNSRecordFormatter {
 
   private CSVFormat csvFormat = CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL);
 

@@ -25,9 +25,8 @@ public class Json {
         return objectMapper.writeValueAsString(object);
       }
     } catch (JsonProcessingException e) {
-      e.printStackTrace();
+      return null;
     }
-    return null;
   }
 
 }
