@@ -29,4 +29,7 @@ public class SubCommandManager {
     throw new NoSuchCommandExecException();
   }
 
+  public List<SubCommand> getSubCommands() {
+    return subCommands;
+  }
 }
