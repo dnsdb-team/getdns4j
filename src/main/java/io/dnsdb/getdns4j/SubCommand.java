@@ -5,7 +5,7 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparsers;
 
 /**
- * <code>SubCommand</code>类比表示一个子命令。
+ * <code>SubCommand</code>类表示一个子命令。
  *
  * @author Remonsan
  * @version 1.0
