@@ -22,7 +22,7 @@ public class SubCommandManager {
 
   public int exec(String command, Namespace namespace) throws NoSuchCommandExecException {
     for (SubCommand subCommand : subCommands) {
-      if (subCommand.getCommand().equals(command)) {
+      if (subCommand.getCommand().startsWith(command)) {
         return subCommand.exec(namespace);
       }
     }
