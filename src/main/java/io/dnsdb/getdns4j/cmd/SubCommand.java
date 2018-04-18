@@ -1,4 +1,4 @@
-package io.dnsdb.getdns4j;
+package io.dnsdb.getdns4j.cmd;
 
 import java.io.PrintStream;
 import net.sourceforge.argparse4j.inf.Namespace;

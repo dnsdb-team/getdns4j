@@ -1,10 +1,11 @@
 package io.dnsdb.getdns4j.test;
 
+import io.dnsdb.getdns4j.cmd.SearchCommand;
 import net.sourceforge.argparse4j.inf.Namespace;
 
 /**
- * <code>SearchCommandNamespaceBuilder</code>类用于辅助测试{@link io.dnsdb.getdns4j.SearchCommand}。在测试{@link
- * io.dnsdb.getdns4j.SearchCommand#exec(Namespace)}方法时生成模拟的<code>Namespace</code>对象。
+ * <code>SearchCommandNamespaceBuilder</code>类用于辅助测试{@link SearchCommand}。在测试{@link
+ * SearchCommand#exec(Namespace)}方法时生成模拟的<code>Namespace</code>对象。
  *
  * @author Remonsan
  * @version 1.0

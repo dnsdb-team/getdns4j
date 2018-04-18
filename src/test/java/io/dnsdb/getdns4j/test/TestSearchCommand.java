@@ -9,7 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Lists;
-import io.dnsdb.getdns4j.SearchCommand;
+import io.dnsdb.getdns4j.cmd.SearchCommand;
 import io.dnsdb.getdns4j.format.DNSRecordCustomFormatter;
 import io.dnsdb.getdns4j.utils.Json;
 import io.dnsdb.getdns4j.utils.ProgressBar;

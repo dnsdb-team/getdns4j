@@ -40,6 +40,10 @@ run {
     }
 }
 
+test {
+    systemProperty "getdns.conf", "$testResultsDir/.test_getdns"
+}
+
 jacocoTestReport {
     reports {
         xml.enabled = true

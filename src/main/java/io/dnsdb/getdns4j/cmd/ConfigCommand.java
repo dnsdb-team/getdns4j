@@ -1,5 +1,6 @@
-package io.dnsdb.getdns4j;
+package io.dnsdb.getdns4j.cmd;
 
+import io.dnsdb.getdns4j.Settings;
 import io.dnsdb.getdns4j.utils.Json;
 import java.io.IOException;
 import java.io.PrintStream;

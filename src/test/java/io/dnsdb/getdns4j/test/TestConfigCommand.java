@@ -7,8 +7,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import io.dnsdb.getdns4j.ConfigCommand;
 import io.dnsdb.getdns4j.Settings;
+import io.dnsdb.getdns4j.cmd.ConfigCommand;
 import java.io.File;
 import java.util.UUID;
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -27,6 +27,7 @@ public class TestConfigCommand {
 
   private ConfigCommand configCommand;
   private File file = new File(Settings.CONFIG);
+
 
   @Before
   public void setup() {

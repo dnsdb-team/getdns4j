@@ -2,9 +2,9 @@ package io.dnsdb.getdns4j.test;
 
 import static org.mockito.Mockito.mock;
 
-import io.dnsdb.getdns4j.NoSuchCommandExecException;
-import io.dnsdb.getdns4j.SubCommand;
-import io.dnsdb.getdns4j.SubCommandManager;
+import io.dnsdb.getdns4j.cmd.NoSuchCommandExecException;
+import io.dnsdb.getdns4j.cmd.SubCommand;
+import io.dnsdb.getdns4j.cmd.SubCommandManager;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparsers;
 import org.junit.Assert;

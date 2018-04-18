@@ -6,7 +6,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import io.dnsdb.getdns4j.APIUserCommand;
+import io.dnsdb.getdns4j.APIUserWrapper;
+import io.dnsdb.getdns4j.cmd.APIUserCommand;
 import io.dnsdb.getdns4j.utils.Json;
 import io.dnsdb.sdk.APIClient;
 import io.dnsdb.sdk.APIUser;
@@ -70,12 +71,17 @@ public class TestAPIUserCommand extends APIUserCommand {
     setOutPrintSteam(output);
     Namespace namespace = new APIUserCommandNamespaceBuilder().build();
     assertEquals(0, exec(namespace));
-    assertEquals(Json.dumps(apiUser, true), output.getLines().get(0));
+    assertEquals(Json.dumps(new APIUserWrapper(apiUser), true), output.getLines().get(0));
     throwException = new APIException(10001, "unauthorized");
     MockPrintStream err = new MockPrintStream();
     setErrPrintStream(err);
     assertEquals(-1, exec(namespace));
     assertEquals("error code: 10001, message: unauthorized", err.getLines().get(0));
+
+    err.clear();
+    namespace = new APIUserCommandNamespaceBuilder().setProxy("wrongSocks5proxy").build();
+    assertEquals(-1, exec(namespace));
+    assertEquals("invalid proxy", err.getLines().get(0));
   }
 
   @Test

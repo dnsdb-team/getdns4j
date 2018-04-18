@@ -1,13 +1,12 @@
-package io.dnsdb.getdns4j;
+package io.dnsdb.getdns4j.cmd;
 
 import com.google.common.base.Strings;
+import io.dnsdb.getdns4j.Settings;
 import io.dnsdb.getdns4j.format.DNSRecordCSVFormatter;
 import io.dnsdb.getdns4j.format.DNSRecordCustomFormatter;
 import io.dnsdb.getdns4j.format.DNSRecordFormatter;
 import io.dnsdb.getdns4j.format.DNSRecordJsonFormatter;
 import io.dnsdb.getdns4j.utils.ProgressBar;
-import io.dnsdb.getdns4j.utils.proxy.InvalidProxyStringException;
-import io.dnsdb.getdns4j.utils.proxy.ProxyUtils;
 import io.dnsdb.sdk.APIClient;
 import io.dnsdb.sdk.APIClientBuilder;
 import io.dnsdb.sdk.APIManager;
@@ -33,7 +32,7 @@ import org.apache.http.client.config.RequestConfig;
  * @author Remonsan
  * @version 1.0
  */
-public class SearchCommand extends SubCommand {
+public class SearchCommand extends APIRequestCommand {
 
   private ProgressBar progressBar = new ProgressBar();
 
@@ -94,13 +93,8 @@ public class SearchCommand extends SubCommand {
     PrintStream errPrintStream = getErrPrintStream();
     APIManager.API_BASE_URL = namespace.getString("api_url");
     String proxy = namespace.get("proxy");
-    if (!Strings.isNullOrEmpty(proxy)) {
-      try {
-        ProxyUtils.setProxy(proxy);
-      } catch (InvalidProxyStringException e) {
-        errPrintStream.println("invalid proxy");
-        return -1;
-      }
+    if (!setProxy(proxy)) {
+      return -1;
     }
     String apiId = namespace.getString("api_id");
     String apiKey = namespace.getString("api_key");

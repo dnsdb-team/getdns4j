@@ -1,11 +1,12 @@
 package io.dnsdb.getdns4j.test;
 
 
+import io.dnsdb.getdns4j.cmd.APIUserCommand;
 import net.sourceforge.argparse4j.inf.Namespace;
 
 /**
- * <code>APIUserCommandNamespaceBuilder</code>类用于辅助测试{@link io.dnsdb.getdns4j.APIUserCommand}。在测试{@link
- * io.dnsdb.getdns4j.APIUserCommand#exec(Namespace)}方法时生成模拟的<code>Namespace</code>对象。
+ * <code>APIUserCommandNamespaceBuilder</code>类用于辅助测试{@link APIUserCommand}。在测试{@link
+ * APIUserCommand#exec(Namespace)}方法时生成模拟的<code>Namespace</code>对象。
  *
  * @author Remonsan
  * @version 1.0
@@ -16,6 +17,7 @@ public class APIUserCommandNamespaceBuilder {
   private String apiId = null;
   private String apiKey = null;
   private String apiUrl = null;
+  private String proxy = null;
   private float timeout = 15;
 
   public Namespace build() {
@@ -55,6 +57,15 @@ public class APIUserCommandNamespaceBuilder {
 
   public APIUserCommandNamespaceBuilder setApiUrl(String apiUrl) {
     this.apiUrl = apiUrl;
+    return this;
+  }
+
+  public String getProxy() {
+    return proxy;
+  }
+
+  public APIUserCommandNamespaceBuilder setProxy(String proxy) {
+    this.proxy = proxy;
     return this;
   }
 

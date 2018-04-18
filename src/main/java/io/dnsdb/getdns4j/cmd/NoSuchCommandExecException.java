@@ -1,4 +1,4 @@
-package io.dnsdb.getdns4j;
+package io.dnsdb.getdns4j.cmd;
 
 /**
  * <code>NoSuchCommandExecException</code>异常表示没有命令执行。

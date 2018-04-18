@@ -8,3 +8,4 @@ target/
 coverage.xml
 .DS_Store
 .gradle/
+out/

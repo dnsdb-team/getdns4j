@@ -1,7 +1,7 @@
 package io.dnsdb.getdns4j.test;
 
 import io.dnsdb.getdns4j.Application;
-import io.dnsdb.getdns4j.SubCommandManager;
+import io.dnsdb.getdns4j.cmd.SubCommandManager;
 import org.junit.Assert;
 import org.junit.Test;
 

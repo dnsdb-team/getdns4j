@@ -1,4 +1,4 @@
-package io.dnsdb.getdns4j;
+package io.dnsdb.getdns4j.cmd;
 
 import java.util.ArrayList;
 import java.util.List;

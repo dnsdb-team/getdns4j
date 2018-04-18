@@ -1,5 +1,7 @@
-package io.dnsdb.getdns4j;
+package io.dnsdb.getdns4j.cmd;
 
+import io.dnsdb.getdns4j.APIUserWrapper;
+import io.dnsdb.getdns4j.Settings;
 import io.dnsdb.getdns4j.utils.Json;
 import io.dnsdb.sdk.APIClient;
 import io.dnsdb.sdk.APIClientBuilder;
@@ -20,9 +22,10 @@ import org.apache.http.client.config.RequestConfig;
  * @author Remonsan
  * @version 1.0
  */
-public class APIUserCommand extends SubCommand {
+public class APIUserCommand extends APIRequestCommand {
 
   private PrintStream outPrintSteam = System.out;
+  private PrintStream errPrintStream = System.err;
 
   public APIUserCommand(Subparsers subparsers) {
     super(subparsers);
@@ -33,6 +36,9 @@ public class APIUserCommand extends SubCommand {
     float timeout = settings.getFloat("settings", "timeout", 15);
     Subparser apiUserParser = subparsers.addParser("api-user").help("get API User information")
         .description("get API User information").defaultHelp(true);
+    apiUserParser.addArgument("-P", "--proxy").help(
+        "set proxy. HTTP proxy: \"http://user:pass@host:port/\", SOCKS5 proxy: \"socks://user:pass@host:port\"")
+        .setDefault(settings.getProxy());
     apiUserParser.addArgument("--api-url").help("set API URL").setDefault(apiUrl);
     apiUserParser.addArgument("--timeout", "-T").type(Float.class)
         .help("set the default socket timeout").type(Float.class)
@@ -51,12 +57,16 @@ public class APIUserCommand extends SubCommand {
   public int exec(Namespace namespace) {
     PrintStream err = getErrPrintStream();
     APIManager.API_BASE_URL = namespace.getString("api_url");
+    String proxy = namespace.get("proxy");
+    if (!setProxy(proxy)) {
+      return -1;
+    }
     String apiId = namespace.getString("api_id");
     String apiKey = namespace.getString("api_key");
     float timeout = namespace.getFloat("timeout");
     APIClient client = buildAPIClient(apiId, apiKey, timeout);
     try {
-      APIUser apiUser = client.getAPIUser();
+      APIUser apiUser = new APIUserWrapper(client.getAPIUser());
       getOutPrintSteam().println(Json.dumps(apiUser, true));
     } catch (APIException | IOException e) {
       err.println(e.getMessage());

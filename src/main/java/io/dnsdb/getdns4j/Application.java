@@ -1,5 +1,9 @@
 package io.dnsdb.getdns4j;
 
+import io.dnsdb.getdns4j.cmd.APIUserCommand;
+import io.dnsdb.getdns4j.cmd.ConfigCommand;
+import io.dnsdb.getdns4j.cmd.SearchCommand;
+import io.dnsdb.getdns4j.cmd.SubCommandManager;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;

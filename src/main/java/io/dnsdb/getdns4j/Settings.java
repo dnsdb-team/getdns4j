@@ -17,7 +17,10 @@ import org.ini4j.Profile;
 public class Settings {
 
   private Ini ini;
-  public static final String CONFIG = System.getProperty("user.home") + "/.getdns";
+  public static final String DEFAULT_CONF_PATH = System.getProperty("user.home") + "/.getdns";
+  public static final String ENV_CONF = System.getenv()
+      .getOrDefault("GETDNS_CONF", DEFAULT_CONF_PATH);
+  public static final String CONFIG = System.getProperty("getdns.conf", ENV_CONF);
   private static final Settings settings = new Settings(CONFIG);
 
   private Settings(String path) {
